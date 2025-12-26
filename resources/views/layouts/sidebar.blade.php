@@ -30,7 +30,8 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('produk.index') }}">
+                {{-- Use direct URL so cashiers always hit /produk (read-only products page) --}}
+                <a href="{{ url('/produk') }}">
                     <i class="fa fa-cubes"></i> <span>Products</span>
                 </a>
             </li>
@@ -89,6 +90,16 @@
                 </a>
             </li>
             @else
+            <li>
+                <a href="{{ route('produk.index') }}">
+                    <i class="fa fa-cubes"></i> <span>Products</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('penjualan.index') }}">
+                    <i class="fa fa-dollar"></i> <span>Sales List</span>
+                </a>
+            </li>
             <li>
                 <a href="{{ route('transaksi.baru') }}">
                     <i class="fa fa-cart-plus"></i> <span>New Sale</span>

@@ -10,6 +10,21 @@
 @endsection
 
 @section('content')
+@if($isFirstOfMonth)
+<div class="row">
+    <div class="col-lg-12">
+        <div class="alert alert-info alert-dismissible">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            <h4><i class="icon fa fa-info"></i> Monthly Sales Report Available!</h4>
+            <p>The monthly sales report for {{ date('F Y', strtotime($startDate)) }} is now available for download.</p>
+            <a href="{{ route('penjualan.monthly_report', ['startDate' => $startDate, 'endDate' => $endDate]) }}" class="btn btn-primary btn-lg" target="_blank">
+                <i class="fa fa-download"></i> Download Monthly Report PDF
+            </a>
+        </div>
+    </div>
+</div>
+@endif
+
 <div class="row">
     <div class="col-lg-12">
         <div class="box">
@@ -20,6 +35,8 @@
                         <th>Date</th>
                         <th>Products</th>
                         <th>Room Details</th>
+                        <th>Phone Number</th>
+                        <th>Receipt ID</th>
                         <th>Quantity</th>
                         <th>Total Price</th>
                         <th>Discount</th>
@@ -54,6 +71,8 @@
                 {data: 'tanggal'},
                 {data: 'products'},
                 {data: 'room_details'},
+                {data: 'phone_number'},
+                {data: 'receipt_number'},
                 {data: 'total_item'},
                 {data: 'total_harga'},
                 {data: 'diskon'},

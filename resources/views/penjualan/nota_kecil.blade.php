@@ -6,8 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Small Note</title>
 
-    <?php
-    $style = '
     <style>
         * {
             font-family: "consolas", sans-serif;
@@ -30,17 +28,9 @@
         @media print {
             @page {
                 margin: 0;
-                size: 75mm 
-    ';
-    ?>
-    <?php 
-    $style .= 
-        ! empty($_COOKIE['innerHeight'])
-            ? $_COOKIE['innerHeight'] .'mm; }'
-            : '}';
-    ?>
-    <?php
-    $style .= '
+                /* Fixed long height so all content fits on one slip even online */
+                size: 75mm 200mm;
+            }
             html, body {
                 width: 70mm;
             }
@@ -49,10 +39,6 @@
             }
         }
     </style>
-    ';
-    ?>
-
-    {!! $style !!}
 </head>
 <body onload="window.print()">
     <button class="btn-print" style="position: absolute; right: 1rem; top: rem;" onclick="window.print()">Print</button>
@@ -67,6 +53,9 @@
     </div>
     <div class="clear-both" style="clear: both;"></div>
     <p>No: {{ tambah_nol_didepan($penjualan->id_penjualan, 10) }}</p>
+    @if($penjualan->receipt_number)
+    <p>Receipt ID: {{ $penjualan->receipt_number }}</p>
+    @endif
     @if($penjualan->room_unique_details)
     <p>Room: {{ strtoupper($penjualan->room_unique_details) }}</p>
     @endif

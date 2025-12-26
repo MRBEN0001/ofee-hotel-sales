@@ -40,6 +40,12 @@
             <td>Date</td>
             <td>: {{ tanggal_indonesia(date('Y-m-d')) }}</td>
         </tr>
+        @if($penjualan->receipt_number)
+        <tr>
+            <td>Receipt ID</td>
+            <td>: {{ $penjualan->receipt_number }}</td>
+        </tr>
+        @endif
         @if($penjualan->room_unique_details)
         <tr>
             <td>Room Details</td>

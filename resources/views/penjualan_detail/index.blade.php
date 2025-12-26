@@ -101,6 +101,14 @@ Sales Transactions
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label for="phone_number" class="col-lg-2 control-label">Phone Number</label>
+                                <div class="col-lg-8">
+                                    <input type="text" name="phone_number" id="phone_number" class="form-control" 
+                                        value="{{ $penjualan->phone_number ?? '' }}" 
+                                        placeholder="Customer phone (optional)">
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label for="diskon" class="col-lg-2 control-label">Discount</label>
                                 <div class="col-lg-8">
                                     <div class="input-group">

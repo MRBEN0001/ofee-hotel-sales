@@ -45,13 +45,19 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-    Route::group(['middleware' => 'auth'], function () {
+Route::group(['middleware' => 'auth'], function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // ================== Product (for Admin and Cashiers) ==================
+    // ================== Product (for all authenticated users: admin + cashiers) ==================
+    Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
+    Route::get('/produk/data', [ProdukController::class, 'data'])->name('produk.data');
+
+    // ================== Sales List (for all authenticated users: admin + cashiers) ==================
     Route::group(['middleware' => 'level:1,2'], function () {
-        Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
-        Route::get('/produk/data', [ProdukController::class, 'data'])->name('produk.data');
+        Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
+        Route::get('/penjualan/data', [PenjualanController::class, 'data'])->name('penjualan.data');
+        Route::get('/penjualan/monthly-report', [PenjualanController::class, 'monthlyReportPDF'])->name('penjualan.monthly_report');
+        Route::get('/penjualan/{id}', [PenjualanController::class, 'show'])->name('penjualan.show');
     });
 
     Route::group(['middleware' => 'level:1'], function () {
@@ -65,7 +71,15 @@ Route::get('/', function () {
         Route::post('/produk/cetak-barcode', [ProdukController::class, 'cetakBarcode'])->name('produk.cetak_barcode');
         // Route::resource('/produk', ProdukController::class);
 
-        Route::resource('/products', ProdukController::class)->names('produk');
+        Route::resource('/products', ProdukController::class)->names([
+            'index' => 'produk.admin.index',
+            'store' => 'produk.store',
+            'show' => 'produk.show',
+            'update' => 'produk.update',
+            'destroy' => 'produk.destroy',
+            'create' => 'produk.create',
+            'edit' => 'produk.edit'
+        ]);
 
             // ================== Member (Customer) ==================
 
@@ -96,12 +110,9 @@ Route::get('/', function () {
             ->except('create', 'show', 'edit');
 
 
-                                // ================== Sales ==================
+                                // ================== Sales (Admin Only Actions) ==================
 
-
-        Route::get('/penjualan/data', [PenjualanController::class, 'data'])->name('penjualan.data');
-        Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
-        Route::get('/penjualan/{id}', [PenjualanController::class, 'show'])->name('penjualan.show');
+        // Delete route is admin-only (view routes are above for both admin and cashiers)
         Route::delete('/penjualan/{id}', [PenjualanController::class, 'destroy'])->name('penjualan.destroy');
     });
 
