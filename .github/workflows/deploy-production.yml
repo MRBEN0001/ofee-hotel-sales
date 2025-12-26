@@ -45,7 +45,7 @@ jobs:
 
       # 6. Deploy files via SFTP
       - name: Upload to Namecheap (SFTP)
-        uses: SamKirkland/FTP-Deploy-Action@v4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
