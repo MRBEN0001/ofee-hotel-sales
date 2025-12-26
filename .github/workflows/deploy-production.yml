@@ -1,0 +1,61 @@
+name: Production Deployment (Namecheap)
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Pull repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup PHP environment
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          tools: composer
+          coverage: none
+
+      # 3. Validate composer.json
+      - name: Validate composer
+        run: composer validate --no-check-publish
+
+      # 4. Install production dependencies
+      - name: Install Composer dependencies
+        run: |
+          composer install \
+          --no-dev \
+          --prefer-dist \
+          --no-interaction \
+          --optimize-autoloader
+
+      # 5. Remove files that must NEVER be deployed
+      - name: Cleanup before deploy
+        run: |
+          rm -rf .git
+          rm -rf tests
+          rm -rf node_modules
+          rm -f .env
+
+      # 6. Deploy files via SFTP
+      - name: Upload to Namecheap (SFTP)
+        uses: SamKirkland/FTP-Deploy-Action@v4
+        with:
+          server: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASS }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          protocol: sftp
+          local-dir: ./
+          server-dir: ${{ secrets.DEPLOY_PATH }}
+          exclude: |
+            **/.git*
+            **/.env
+            **/tests/**
+            **/node_modules/**
