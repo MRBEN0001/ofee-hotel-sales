@@ -20,3 +20,5 @@ jobs:
           script: |
             cd ~/public_html/ofee-hotel-sales
             git pull origin master
+            debug: true
+            request_pty: true
