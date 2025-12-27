@@ -8,7 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -17,8 +16,14 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.SSH_PORT }}
+          debug: true
+          request_pty: true
           script: |
+            mkdir -p ~/.ssh
+            chmod 700 ~/.ssh
+            # ensure GitHub host key is known on the REMOTE server so `git pull` can verify github.com
+            ssh-keyscan github.com >> ~/.ssh/known_hosts || true
+            chmod 600 ~/.ssh/known_hosts || true
+
             cd ~/public_html/ofee-hotel-sales
             git pull origin master
-            debug: true
-            request_pty: true
