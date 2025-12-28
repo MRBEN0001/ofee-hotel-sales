@@ -57,7 +57,7 @@
     <p>Receipt ID: {{ $penjualan->receipt_number }}</p>
     @endif
     @if($penjualan->room_unique_details)
-    <p>Room: {{ strtoupper($penjualan->room_unique_details) }}</p>
+    <p>Name: {{ strtoupper($penjualan->room_unique_details) }}</p>
     @endif
     <p class="text-center">===================================</p>
     

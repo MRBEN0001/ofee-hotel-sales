@@ -74,7 +74,7 @@
                 <th width="12%">Date</th>
                 <th width="15%">Receipt ID</th>
                 <th width="20%">Products</th>
-                <th width="12%">Room Details</th>
+                <th width="12%">Name</th>
                 <th width="8%">Quantity</th>
                 <th width="10%">Total Price</th>
                 <th width="8%">Discount</th>

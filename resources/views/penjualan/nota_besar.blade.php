@@ -48,7 +48,7 @@
         @endif
         @if($penjualan->room_unique_details)
         <tr>
-            <td>Room Details</td>
+            <td>Name</td>
             <td>: {{ $penjualan->room_unique_details }}</td>
         </tr>
         @endif

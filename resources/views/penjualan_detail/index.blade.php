@@ -93,11 +93,11 @@ Sales Transactions
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label for="room_unique_details" class="col-lg-2 control-label">Room Details</label>
+                                <label for="room_unique_details" class="col-lg-2 control-label">Name</label>
                                 <div class="col-lg-8">
                                     <input type="text" name="room_unique_details" id="room_unique_details" class="form-control" 
                                         value="{{ $penjualan->room_unique_details ?? '' }}" 
-                                        placeholder="e.g., Room 101, Suite A2, etc.">
+                                        placeholder="Enter customer name">
                                 </div>
                             </div>
                             <div class="form-group row">

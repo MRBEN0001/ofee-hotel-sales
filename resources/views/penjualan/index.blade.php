@@ -34,7 +34,7 @@
                         <th width="5%">#</th>
                         <th>Date</th>
                         <th>Products</th>
-                        <th>Room Details</th>
+                        <th>Name</th>
                         <th>Phone Number</th>
                         <th>Receipt ID</th>
                         <th>Quantity</th>
