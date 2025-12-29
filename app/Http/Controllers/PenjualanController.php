@@ -50,9 +50,11 @@ class PenjualanController extends Controller
                 return tanggal_indonesia($penjualan->created_at, false);
             })
             ->addColumn('products', function ($penjualan) {
-                $products = $penjualan->detail->map(function($detail) {
+                $products = $penjualan->detail->filter(function($detail) {
+                    return $detail->produk !== null;
+                })->map(function($detail) {
                     return $detail->produk->nama_produk ?? 'N/A';
-                })->unique()->take(3)->implode(', ');
+                })->filter()->unique()->take(3)->implode(', ');
                 
                 if ($penjualan->detail->count() > 3) {
                     $products .= '... (+' . ($penjualan->detail->count() - 3) . ' more)';
@@ -151,10 +153,10 @@ class PenjualanController extends Controller
             ->of($detail)
             ->addIndexColumn()
             ->addColumn('kode_produk', function ($detail) {
-                return '<span class="label label-success">'. $detail->produk->kode_produk .'</span>';
+                return '<span class="label label-success">'. ($detail->produk->kode_produk ?? 'N/A') .'</span>';
             })
             ->addColumn('nama_produk', function ($detail) {
-                return $detail->produk->nama_produk;
+                return $detail->produk->nama_produk ?? 'N/A';
             })
             ->addColumn('harga_jual', function ($detail) {
                 return '₦ '. format_uang($detail->harga_jual);
