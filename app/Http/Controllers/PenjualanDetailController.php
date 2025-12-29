@@ -70,7 +70,7 @@ class PenjualanDetailController extends Controller
             $row['nama_produk'] = $item->produk['nama_produk'];
             $row['harga_jual']  = '₦ '. format_uang($item->harga_jual);
             $row['jumlah']      = '<input type="number" class="form-control input-sm quantity" data-id="'. $item->id_penjualan_detail .'" value="'. $item->jumlah .'">';
-            $row['diskon']      = $item->diskon . '%';
+            $row['diskon']      = '<input type="number" class="form-control input-sm discount-input" data-id="'. $item->id_penjualan_detail .'" value="'. $item->diskon .'" min="0" max="100" step="0.01">';
             $row['subtotal']    = '₦ '. format_uang($item->subtotal);
             $row['aksi']        = '<div class="btn-group">
                                     <button onclick="deleteData(`'. route('transaksi.destroy', $item->id_penjualan_detail) .'`)" class="btn btn-xs btn-danger btn-flat"><i class="fa fa-trash"></i></button>
@@ -103,7 +103,7 @@ class PenjualanDetailController extends Controller
         return datatables()
             ->of($data)
             ->addIndexColumn()
-            ->rawColumns(['aksi', 'kode_produk', 'jumlah'])
+            ->rawColumns(['aksi', 'kode_produk', 'jumlah', 'diskon'])
             ->make(true);
     }
 
@@ -140,9 +140,26 @@ class PenjualanDetailController extends Controller
     public function update(Request $request, $id)
     {
         $detail = PenjualanDetail::find($id);
-        $detail->jumlah = $request->jumlah;
-        $detail->subtotal = $detail->harga_jual * $request->jumlah - (($detail->diskon * $request->jumlah) / 100 * $detail->harga_jual);;
+        
+        // Update quantity if provided
+        if ($request->has('jumlah')) {
+            $detail->jumlah = $request->jumlah;
+        }
+        
+        // Update discount if provided
+        if ($request->has('diskon')) {
+            $diskon = floatval($request->diskon);
+            // Validate discount range
+            if ($diskon < 0) $diskon = 0;
+            if ($diskon > 100) $diskon = 100;
+            $detail->diskon = $diskon;
+        }
+        
+        // Recalculate subtotal with current values
+        $detail->subtotal = $detail->harga_jual * $detail->jumlah - (($detail->diskon * $detail->jumlah) / 100 * $detail->harga_jual);
         $detail->update();
+        
+        return response()->json(['message' => 'Data updated successfully'], 200);
     }
 
     public function destroy($id)

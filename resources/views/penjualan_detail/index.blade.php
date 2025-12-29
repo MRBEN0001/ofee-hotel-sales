@@ -232,6 +232,36 @@ Sales Transactions
                 });
         });
 
+        // ✅ When discount input changes
+        $(document).on('input', '.discount-input', function () {
+            let id = $(this).data('id');
+            let diskon = parseFloat($(this).val()) || 0;
+
+            // Validate discount range
+            if (diskon < 0) {
+                $(this).val(0);
+                diskon = 0;
+            }
+            if (diskon > 100) {
+                $(this).val(100);
+                diskon = 100;
+            }
+
+            $.post(`{{ url('/transaksi') }}/${id}`, {
+                    '_token': $('[name=csrf-token]').attr('content'),
+                    '_method': 'put',
+                    'diskon': diskon
+                })
+                .done(response => {
+                    // Reload table to update subtotals and totals
+                    table.ajax.reload(() => loadForm(0));
+                })
+                .fail(errors => {
+                    alert('Unable to save discount');
+                    return;
+                });
+        });
+
         // ✅ Auto-calculate when received value changes (discount is readonly, item discounts already in subtotals)
         $(document).on('input', '#diterima', function () {
             if ($(this).val() == "") {
