@@ -33,6 +33,12 @@
                 
                 
             </div>
+            @else
+            <div class="box-header with-border">
+                <div class="btn-group">
+                    <button onclick="addForm('{{ route('produk.add_product') }}')" class="btn btn-success btn-flat"><i class="fa fa-plus-circle"></i> Add New Product</button>
+                </div>
+            </div>
             @endif
             <div class="box-body table-responsive">
                 <form action="" method="post" class="form-produk">

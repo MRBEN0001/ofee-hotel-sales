@@ -50,11 +50,11 @@ class ProdukController extends Controller
                 ';
             });
         } else {
-            // Add action column for non-admin users (add stock button)
+            // Add action column for non-admin users (add stock button and add product button)
             $datatable->addColumn('aksi', function ($produk) {
                 return '
                 <div class="btn-group">
-                    <button type="button" onclick="showAddStockForm(`'. $produk->id_produk .'`, `'. $produk->nama_produk .'`, `'. $produk->stok .'`)" class="btn btn-xs btn-success btn-flat"><i class="fa fa-plus"></i></button>
+                    <button type="button" onclick="showAddStockForm(`'. $produk->id_produk .'`, `'. $produk->nama_produk .'`, `'. $produk->stok .'`)" class="btn btn-xs btn-success btn-flat" title="Add Stock"><i class="fa fa-plus"></i></button>
                 </div>
                 ';
             });
