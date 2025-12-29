@@ -45,6 +45,16 @@ class ProdukController extends Controller
                 <div class="btn-group">
                     <button type="button" onclick="editForm(`'. route('produk.update', $produk->id_produk) .'`)" class="btn btn-xs btn-primary btn-flat"><i class="fa fa-pencil"></i></button>
                     <button type="button" onclick="deleteData(`'. route('produk.destroy', $produk->id_produk) .'`)" class="btn btn-xs btn-danger btn-flat"><i class="fa fa-trash"></i></button>
+                    <button type="button" onclick="showAddStockForm(`'. $produk->id_produk .'`, `'. $produk->nama_produk .'`, `'. $produk->stok .'`)" class="btn btn-xs btn-success btn-flat"><i class="fa fa-plus"></i></button>
+                </div>
+                ';
+            });
+        } else {
+            // Add action column for non-admin users (add stock button)
+            $datatable->addColumn('aksi', function ($produk) {
+                return '
+                <div class="btn-group">
+                    <button type="button" onclick="showAddStockForm(`'. $produk->id_produk .'`, `'. $produk->nama_produk .'`, `'. $produk->stok .'`)" class="btn btn-xs btn-success btn-flat"><i class="fa fa-plus"></i></button>
                 </div>
                 ';
             });
@@ -67,7 +77,7 @@ class ProdukController extends Controller
                 }
                 return $stok;
             })
-            ->rawColumns(auth()->user()->level == 1 ? ['aksi', 'kode_produk', 'select_all', 'stok'] : ['kode_produk', 'stok'])
+            ->rawColumns(auth()->user()->level == 1 ? ['aksi', 'kode_produk', 'select_all', 'stok'] : ['aksi', 'kode_produk', 'stok'])
             ->make(true);
     }
 
@@ -181,5 +191,21 @@ class ProdukController extends Controller
 
     return view('produk.all_barcode', compact('dataproduk', 'no'));
 }
+
+    public function addStock(Request $request, $id)
+    {
+        $request->validate([
+            'stock_to_add' => 'required|numeric|min:1'
+        ]);
+
+        $produk = Produk::findOrFail($id);
+        $produk->stok += $request->stock_to_add;
+        $produk->update();
+
+        return response()->json([
+            'message' => 'Stock added successfully',
+            'new_stock' => $produk->stok
+        ], 200);
+    }
 
 }

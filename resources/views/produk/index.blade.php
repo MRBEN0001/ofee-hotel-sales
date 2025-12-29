@@ -53,9 +53,7 @@
                             <th>Selling Price</th>
                             <th>Discount</th>
                             <th>Stock</th>
-                            @if(auth()->user()->level == 1)
                             <th width="15%"><i class="fa fa-cog"></i></th>
-                            @endif
                         </thead>
                     </table>
                 </form>
@@ -65,6 +63,42 @@
 </div>
 
 @includeIf('produk.form')
+
+<!-- Add Stock Modal -->
+<div class="modal fade" id="modal-add-stock" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Add Stock</h4>
+            </div>
+            <div class="modal-body">
+                <form id="form-add-stock">
+                    @csrf
+                    <input type="hidden" id="add-stock-product-id" name="product_id">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" id="add-stock-product-name" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Current Stock</label>
+                        <input type="text" id="add-stock-current-stock" class="form-control" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="stock_to_add">Stock to Add <span class="text-danger">*</span></label>
+                        <input type="number" name="stock_to_add" id="stock_to_add" class="form-control" min="1" required autofocus>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-flat" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success btn-flat" onclick="submitAddStock()">Add Stock</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -88,10 +122,8 @@
                 ['data' => 'harga_jual'],
                 ['data' => 'diskon'],
                 ['data' => 'stok'],
+                ['data' => 'aksi', 'searchable' => false, 'sortable' => false],
             ]);
-            if ($isAdmin) {
-                $columns[] = ['data' => 'aksi', 'searchable' => false, 'sortable' => false];
-            }
         @endphp
         
         table = $('.table').DataTable({
@@ -237,7 +269,41 @@
     form.submit();
 }
 
+    function showAddStockForm(id, name, currentStock) {
+        $('#add-stock-product-id').val(id);
+        $('#add-stock-product-name').val(name);
+        $('#add-stock-current-stock').val(currentStock);
+        $('#stock_to_add').val('');
+        $('#modal-add-stock').modal('show');
+        $('#stock_to_add').focus();
+    }
 
+    function submitAddStock() {
+        let productId = $('#add-stock-product-id').val();
+        let stockToAdd = $('#stock_to_add').val();
+
+        if (!stockToAdd || stockToAdd < 1) {
+            alert('Please enter a valid stock amount (minimum 1)');
+            return;
+        }
+
+        $.post(`{{ url('/produk') }}/${productId}/add-stock`, {
+            '_token': $('[name=csrf-token]').attr('content'),
+            'stock_to_add': stockToAdd
+        })
+        .done((response) => {
+            $('#modal-add-stock').modal('hide');
+            table.ajax.reload();
+            alert('Stock added successfully! New stock: ' + response.new_stock);
+        })
+        .fail((errors) => {
+            let errorMessage = 'Unable to add stock';
+            if (errors.responseJSON && errors.responseJSON.message) {
+                errorMessage = errors.responseJSON.message;
+            }
+            alert(errorMessage);
+        });
+    }
 
 </script>
 @endpush

@@ -51,6 +51,7 @@ Route::group(['middleware' => 'auth'], function () {
     // ================== Product (for all authenticated users: admin + cashiers) ==================
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
     Route::get('/produk/data', [ProdukController::class, 'data'])->name('produk.data');
+    Route::post('/produk/{id}/add-stock', [ProdukController::class, 'addStock'])->name('produk.add_stock');
 
     // ================== Sales List (for all authenticated users: admin + cashiers) ==================
     Route::group(['middleware' => 'level:1,2'], function () {
