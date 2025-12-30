@@ -28,7 +28,7 @@ class PenjualanController extends Controller
     public function data()
     {
         // Only show completed transactions (where items were actually sold and payment was made)
-        $penjualan = Penjualan::with(['detail.produk', 'user'])
+        $penjualan = Penjualan::with(['detail.produk.kategori', 'user'])
             ->where('total_item', '>', 0)
             ->where('bayar', '>', 0)
             ->orderBy('id_penjualan', 'desc')
@@ -61,6 +61,19 @@ class PenjualanController extends Controller
                 }
                 
                 return $products ?: '-';
+            })
+            ->addColumn('category', function ($penjualan) {
+                $categories = $penjualan->detail->filter(function($detail) {
+                    return $detail->produk !== null && $detail->produk->kategori !== null;
+                })->map(function($detail) {
+                    return $detail->produk->kategori->nama_kategori ?? 'N/A';
+                })->filter()->unique()->take(3)->implode(', ');
+                
+                if ($penjualan->detail->count() > 3) {
+                    $categories .= '... (+' . ($penjualan->detail->count() - 3) . ' more)';
+                }
+                
+                return $categories ?: '-';
             })
             ->addColumn('room_details', function ($penjualan) {
                 return $penjualan->room_unique_details ?? '-';
@@ -305,6 +318,74 @@ class PenjualanController extends Controller
         
         $filename = 'Monthly-Sales-Report-' . date('F-Y', strtotime($startDate)) . '.pdf';
         return $pdf->download($filename);
+    }
+
+    public function dailySales(Request $request)
+    {
+        $selectedDate = $request->input('date', date('Y-m-d'));
+        $startDateTime = $selectedDate . ' 00:00:00';
+        $endDateTime = $selectedDate . ' 23:59:59';
+        
+        // Get all transactions for the date (same as sales list)
+        $allTransactions = Penjualan::with(['detail.produk.kategori', 'user'])
+            ->where('total_item', '>', 0)
+            ->where('bayar', '>', 0)
+            ->whereBetween('created_at', [$startDateTime, $endDateTime])
+            ->orderBy('created_at', 'asc')
+            ->get();
+        
+        // Filter: exclude sales where any product category has "room" or "suite" (case insensitive)
+        $transactions = $allTransactions->filter(function($penjualan) {
+            if ($penjualan->detail && $penjualan->detail->count() > 0) {
+                foreach ($penjualan->detail as $detail) {
+                    if ($detail->produk && $detail->produk->kategori && $detail->produk->kategori->nama_kategori) {
+                        $categoryName = strtolower($detail->produk->kategori->nama_kategori);
+                        if (stripos($categoryName, 'room') !== false || stripos($categoryName, 'suite') !== false) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        })->values();
+        
+        $grandTotal = $transactions->sum('bayar');
+        
+        return view('penjualan.daily_sales', compact('transactions', 'grandTotal', 'selectedDate'));
+    }
+
+    public function dailyRoomSales(Request $request)
+    {
+        $selectedDate = $request->input('date', date('Y-m-d'));
+        $startDateTime = $selectedDate . ' 00:00:00';
+        $endDateTime = $selectedDate . ' 23:59:59';
+        
+        // Get all transactions for the date (same as sales list)
+        $allTransactions = Penjualan::with(['detail.produk.kategori', 'user'])
+            ->where('total_item', '>', 0)
+            ->where('bayar', '>', 0)
+            ->whereBetween('created_at', [$startDateTime, $endDateTime])
+            ->orderBy('created_at', 'asc')
+            ->get();
+        
+        // Filter: only include sales where any product category has "room" or "suite" (case insensitive)
+        $transactions = $allTransactions->filter(function($penjualan) {
+            if ($penjualan->detail && $penjualan->detail->count() > 0) {
+                foreach ($penjualan->detail as $detail) {
+                    if ($detail->produk && $detail->produk->kategori && $detail->produk->kategori->nama_kategori) {
+                        $categoryName = strtolower($detail->produk->kategori->nama_kategori);
+                        if (stripos($categoryName, 'room') !== false || stripos($categoryName, 'suite') !== false) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        })->values();
+        
+        $grandTotal = $transactions->sum('bayar');
+        
+        return view('penjualan.daily_room_sales', compact('transactions', 'grandTotal', 'selectedDate'));
     }
 }
 // visit "codeastro" for more projects!

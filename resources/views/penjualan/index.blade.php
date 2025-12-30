@@ -10,6 +10,17 @@
 @endsection
 
 @section('content')
+<div class="row">
+    <div class="col-lg-12">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="{{ route('penjualan.index') }}">Sales List</a></li>
+            <li><a href="{{ route('penjualan.daily_sales') }}">Daily Sales</a></li>
+            <li><a href="{{ route('penjualan.daily_room_sales') }}">Daily Room Sales</a></li>
+        </ul>
+    </div>
+</div>
+<br>
+
 @if($isFirstOfMonth)
 <div class="row">
     <div class="col-lg-12">
@@ -34,6 +45,7 @@
                         <th width="5%">#</th>
                         <th>Date</th>
                         <th>Products</th>
+                        <th>Category</th>
                         <th>Name</th>
                         <th>Phone Number</th>
                         <th>Receipt ID</th>
@@ -70,6 +82,7 @@
                 {data: 'DT_RowIndex', searchable: false, sortable: false},
                 {data: 'tanggal'},
                 {data: 'products'},
+                {data: 'category'},
                 {data: 'room_details'},
                 {data: 'phone_number'},
                 {data: 'receipt_number'},

@@ -58,6 +58,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::group(['middleware' => 'level:1,2'], function () {
         Route::get('/penjualan', [PenjualanController::class, 'index'])->name('penjualan.index');
         Route::get('/penjualan/data', [PenjualanController::class, 'data'])->name('penjualan.data');
+        Route::get('/penjualan/daily-sales', [PenjualanController::class, 'dailySales'])->name('penjualan.daily_sales');
+        Route::get('/penjualan/daily-room-sales', [PenjualanController::class, 'dailyRoomSales'])->name('penjualan.daily_room_sales');
         Route::get('/penjualan/monthly-report', [PenjualanController::class, 'monthlyReportPDF'])->name('penjualan.monthly_report');
         Route::get('/penjualan/{id}', [PenjualanController::class, 'show'])->name('penjualan.show');
     });
