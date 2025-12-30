@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Daily Sales Report - {{ tanggal_indonesia($selectedDate, false) }}</title>
+
+    <style>
+        body {
+            font-size: 12px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h2 {
+            margin: 5px 0;
+        }
+        .header h4 {
+            margin: 5px 0;
+            color: #666;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .summary-box {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 2px solid #333;
+            margin-top: 20px;
+        }
+        .grand-total {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        @if($setting && $setting->nama_perusahaan)
+        <h1 style="margin: 5px 0; font-size: 24px; font-weight: bold;">{{ strtoupper($setting->nama_perusahaan) }}</h1>
+        @endif
+        <h2>DAILY SALES REPORT</h2>
+        <h4>{{ tanggal_indonesia($selectedDate, false) }}</h4>
+    </div>
+
+    @if($transactions->count() > 0)
+    <h3>Transaction Details</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th width="3%">#</th>
+                <th width="12%">Time</th>
+                <th width="20%">Products</th>
+                <th width="12%">Name</th>
+                <th width="15%">Receipt ID</th>
+                <th width="8%">Quantity</th>
+                <th width="10%">Total Price</th>
+                <th width="8%">Discount</th>
+                <th width="12%">Total Pay</th>
+                <th width="10%">Cashier</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php
+                $no = 1;
+            @endphp
+            @foreach ($transactions as $transaction)
+                <tr>
+                    <td class="text-center">{{ $no++ }}</td>
+                    <td>{{ date('h:i:s A', strtotime($transaction->created_at)) }}</td>
+                    <td>
+                        @php
+                            $productNames = '';
+                            if ($transaction->detail && $transaction->detail->count() > 0) {
+                                $productNames = $transaction->detail->filter(function($detail) {
+                                    return $detail->produk !== null;
+                                })->map(function($detail) {
+                                    return $detail->produk->nama_produk ?? 'N/A';
+                                })->filter()->unique()->take(3)->implode(', ');
+                                if ($transaction->detail->count() > 3) {
+                                    $productNames .= '... (+' . ($transaction->detail->count() - 3) . ' more)';
+                                }
+                            }
+                        @endphp
+                        {{ $productNames ?: '-' }}
+                    </td>
+                    <td>{{ $transaction->room_unique_details ?? '-' }}</td>
+                    <td>{{ $transaction->receipt_number ?? '-' }}</td>
+                    <td class="text-center">{{ format_uang($transaction->total_item) }}</td>
+                    <td class="text-right">{{ format_uang($transaction->total_harga) }}</td>
+                    <td class="text-center">{{ $transaction->diskon }}%</td>
+                    <td class="text-right">NGN {{ format_uang($transaction->bayar) }}</td>
+                    <td>{{ $transaction->user ? $transaction->user->name : '-' }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @else
+    <div style="padding: 20px; text-align: center;">
+        <p><strong>No transactions found for this date.</strong></p>
+    </div>
+    @endif
+
+    <div class="summary-box">
+        <table class="table" style="border: none;">
+            <tr>
+                <td style="border: none; font-size: 16px;" class="grand-total">GRAND TOTAL:</td>
+                <td style="border: none; text-align: right; font-size: 16px;" class="grand-total">NGN {{ format_uang($grandTotal) }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="margin-top: 30px; text-align: center; color: #666; font-size: 10px;">
+        <p>Generated on: {{ tanggal_indonesia(date('Y-m-d'), false) }} at {{ date('H:i:s') }}</p>
+    </div>
+</body>
+</html>
+

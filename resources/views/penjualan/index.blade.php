@@ -21,7 +21,7 @@
 </div>
 <br>
 
-@if($isFirstOfMonth)
+@if($isFirstOfMonth && auth()->user()->level == 1)
 <div class="row">
     <div class="col-lg-12">
         <div class="alert alert-info alert-dismissible">

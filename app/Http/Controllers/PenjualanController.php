@@ -354,6 +354,45 @@ class PenjualanController extends Controller
         return view('penjualan.daily_sales', compact('transactions', 'grandTotal', 'selectedDate'));
     }
 
+    public function dailySalesPDF(Request $request)
+    {
+        $selectedDate = $request->input('date', date('Y-m-d'));
+        $startDateTime = $selectedDate . ' 00:00:00';
+        $endDateTime = $selectedDate . ' 23:59:59';
+        
+        // Get all transactions for the date (same as daily sales)
+        $allTransactions = Penjualan::with(['detail.produk.kategori', 'user'])
+            ->where('total_item', '>', 0)
+            ->where('bayar', '>', 0)
+            ->whereBetween('created_at', [$startDateTime, $endDateTime])
+            ->orderBy('created_at', 'asc')
+            ->get();
+        
+        // Filter: exclude sales where any product category has "room" or "suite" (case insensitive)
+        $transactions = $allTransactions->filter(function($penjualan) {
+            if ($penjualan->detail && $penjualan->detail->count() > 0) {
+                foreach ($penjualan->detail as $detail) {
+                    if ($detail->produk && $detail->produk->kategori && $detail->produk->kategori->nama_kategori) {
+                        $categoryName = strtolower($detail->produk->kategori->nama_kategori);
+                        if (stripos($categoryName, 'room') !== false || stripos($categoryName, 'suite') !== false) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        })->values();
+        
+        $grandTotal = $transactions->sum('bayar');
+        $setting = Setting::first();
+        
+        $pdf = PDF::loadView('penjualan.daily_sales_pdf', compact('transactions', 'grandTotal', 'selectedDate', 'setting'));
+        $pdf->setPaper('a4', 'portrait');
+        
+        $filename = 'Daily-Sales-Report-' . date('Y-m-d', strtotime($selectedDate)) . '.pdf';
+        return $pdf->download($filename);
+    }
+
     public function dailyRoomSales(Request $request)
     {
         $selectedDate = $request->input('date', date('Y-m-d'));
@@ -386,6 +425,45 @@ class PenjualanController extends Controller
         $grandTotal = $transactions->sum('bayar');
         
         return view('penjualan.daily_room_sales', compact('transactions', 'grandTotal', 'selectedDate'));
+    }
+
+    public function dailyRoomSalesPDF(Request $request)
+    {
+        $selectedDate = $request->input('date', date('Y-m-d'));
+        $startDateTime = $selectedDate . ' 00:00:00';
+        $endDateTime = $selectedDate . ' 23:59:59';
+        
+        // Get all transactions for the date (same as daily room sales)
+        $allTransactions = Penjualan::with(['detail.produk.kategori', 'user'])
+            ->where('total_item', '>', 0)
+            ->where('bayar', '>', 0)
+            ->whereBetween('created_at', [$startDateTime, $endDateTime])
+            ->orderBy('created_at', 'asc')
+            ->get();
+        
+        // Filter: only include sales where any product category has "room" or "suite" (case insensitive)
+        $transactions = $allTransactions->filter(function($penjualan) {
+            if ($penjualan->detail && $penjualan->detail->count() > 0) {
+                foreach ($penjualan->detail as $detail) {
+                    if ($detail->produk && $detail->produk->kategori && $detail->produk->kategori->nama_kategori) {
+                        $categoryName = strtolower($detail->produk->kategori->nama_kategori);
+                        if (stripos($categoryName, 'room') !== false || stripos($categoryName, 'suite') !== false) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        })->values();
+        
+        $grandTotal = $transactions->sum('bayar');
+        $setting = Setting::first();
+        
+        $pdf = PDF::loadView('penjualan.daily_room_sales_pdf', compact('transactions', 'grandTotal', 'selectedDate', 'setting'));
+        $pdf->setPaper('a4', 'portrait');
+        
+        $filename = 'Daily-Room-Sales-Report-' . date('Y-m-d', strtotime($selectedDate)) . '.pdf';
+        return $pdf->download($filename);
     }
 }
 // visit "codeastro" for more projects!

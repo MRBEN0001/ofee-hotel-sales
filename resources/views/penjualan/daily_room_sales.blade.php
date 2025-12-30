@@ -26,6 +26,11 @@
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Daily Room Sales Report</h3>
+                <div class="box-tools pull-right">
+                    <a href="{{ route('penjualan.daily_room_sales_pdf', ['date' => $selectedDate]) }}" class="btn btn-success btn-flat" target="_blank">
+                        <i class="fa fa-download"></i> Download PDF
+                    </a>
+                </div>
             </div>
             <div class="box-body">
                 <form method="GET" action="{{ route('penjualan.daily_room_sales') }}" id="filter-form">
