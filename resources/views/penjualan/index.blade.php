@@ -24,7 +24,7 @@
     </div>
 </div>
 @endif
-{{ "auto deployment was successful" }}
+
 <div class="row">
     <div class="col-lg-12">
         <div class="box">
